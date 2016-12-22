@@ -1,4 +1,4 @@
 # CDP
 Comma Separate Value Data Processor
 
-Desktop application developed in Qt creator to manage large data sets acquired by instruments that measure atmospheric quality.
+This is the original and only copy of this project which is entirely based in Qt, a cross-platform application framework, and is written in C++.  Comma-Separated Value Data Processor (CDP) is a desktop application that was designed to manage large csv file data sets. Generally speaking, comma-separated values (csv) files stores tabular data. Each line has a record of data that reflects the headers of the file. The most important piece of data that CDP expects is a time stamp that records the time and date indicating when the data was acquired. The goal is to bring together unique files and match them together based on time stamps of collected data. CDP has a simple interface that only accepts input csv files and returns two files: one of the files outputs blocks of data that fit within a certain time interval and the second returns those blocks of data averaged together into one line. 
