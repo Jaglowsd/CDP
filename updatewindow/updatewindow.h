@@ -21,6 +21,7 @@ class UpdateWindow: public QObject
     Q_OBJECT
 
 public:
+    UpdateWindow(); // Default Constructor
     UpdateWindow(QWidget *parent);
 
     QVector<int> resolutions = QVector<int>(6, -1);
@@ -35,25 +36,28 @@ public:
     QString saveDestination;
 
     bool createDataHandler(int, QString);
-    bool handleData();
+    bool handleData(); // Begins process of handling all data in DataHandler.cpp
 
-    void addFileObject(FileSelect* fs);
-    void removeFileObject();
+    void addFileObject(FileSelect* fs); // Add file select object to list
+    void removeFileObject(); // Remove file select object from list
 
     void setTimeResolution(int);
     int getTimeResolution();
     void setSaveDestination(QString);
 
-    int findTimesToCompare(QString, QTextStream*);
-    int compareTimes(QString, QString, int);
+    int findTimesToCompare(QString, QTextStream*); // Gathers times for comparison
+    int compareTimes(QString, QString, int); // Compares two date time values to find time resolution
 
-    void clear();
+    void clear(); // Called when remove button is signaled to clear all changes made to the window
+                    // Sets all resolutions to -1, indicating there is no min time to be displayed
 
-    void update(QString);
-    void minimumTime();
-    bool duplicates(QString);
-    int GCD(int, int);
-    int LCM(int, int);
+    void update(QString); // When textChanged() on a line edit objects is signaled
+                          // Caller is update(QString str) in MainWindow
+
+    void minimumTime(); // Find the minimum resolution time to display
+    bool duplicates(QString); // Remove duplicate files
+    int GCD(int, int); // Find Greated Common Divisor
+    int LCM(int, int); // Find the Least Common Multiple
 };
 
 #endif // UpdateWindow_H

@@ -1,5 +1,6 @@
 #include "updatewindow.h"
 
+UpdateWindow::UpdateWindow(){}
 UpdateWindow::UpdateWindow(QWidget *parent){
     timeResolution = 0;
     this->parent = parent; // Have a reference to mainWidget from MainWindow in order to display inputDialog
@@ -10,7 +11,7 @@ UpdateWindow::UpdateWindow(QWidget *parent){
 
 bool UpdateWindow::createDataHandler(int timeScale, QString units)
 {
-    dataHandler = new DataHandler(&fSList, &resolutions, &fileTypes, timeResolution, saveDestination, timeScale, units);
+    dataHandler = new DataHandler(&fSList, &resolutions, timeResolution, saveDestination, timeScale, units);
     bool isSuccess = handleData();
     return isSuccess;
 }
@@ -23,18 +24,28 @@ bool UpdateWindow::handleData()
         success = dataHandler->findStartTime();
         if(success)
         {
+            dataHandler->addDateApollo();
+            success = dataHandler->findStartTime();
+        }
+        if(success)
+        {
             success = dataHandler->printHeaders();
             if(success)
             {
-                qDebug() << "hi";
-                return true;
-            }
+                success = dataHandler->gatherTimeBlockData();
+                if(success)
+                    return true;
+                else
+                    return false;
+                // Total success if time block data is outputted to save files
+
+            } // Continue if headers are able to be printed
             else
                 return false;
-        }
+        } // Continue if a start time is successfully found
         else
             return false;
-    }
+    } // Continue if files are read properly
     else
         return false;
 }
@@ -161,11 +172,10 @@ void UpdateWindow::update(QString str)
         } // Strings that are legitimate file names will access these statements because file dialogs will not allow anything but a valid file path
 
     } // Empty string indicates that work is done elsewhere (i.e. duplicates or update)
+}
 
-} // When textChanged() on line edit objects is signaled
-  // Caller is update(QString str) in MainWindow
-
-bool UpdateWindow::duplicates(QString str) {
+bool UpdateWindow::duplicates(QString str)
+{
     int position = -1;
     if(str != "" && str != "remove")
     {
@@ -183,10 +193,8 @@ bool UpdateWindow::duplicates(QString str) {
                     (fSList[position])->fileName->setText("");
                     (fSList[position])->fileType->setCurrentIndex(0);
                     (fSList[position])->timeResolution->setText("");
-                    qDebug() << resolutions;
                     resolutions[temp] = -1;
                     resolutions[position] = -1;
-                    qDebug() << resolutions;
                     minimumTime();
                     return true;
 
@@ -202,7 +210,7 @@ bool UpdateWindow::duplicates(QString str) {
 
     return false;
 
-} // Check for duplicate file names, true for no duplicates, false for duplicates
+}
 
 int UpdateWindow::findTimesToCompare(QString type, QTextStream *in){
     QRegularExpression re;
@@ -305,14 +313,16 @@ int UpdateWindow::compareTimes(QString str1, QString str2, int instruction) {
 
     time1 = time1.fromString(subStr1);
     time2 = time2.fromString(subStr2);
+    // If Instruction is not 0, 1, or 2, then it is Apollo because no splitting of strings is necessary
 
     int difference = abs(time1.secsTo(time2));
 
     return difference;
 
-} // If Instruction is not 0, 1, or 2, then it is Apollo because no splitting of strings is necessary
+}
 
-void UpdateWindow::minimumTime() {
+void UpdateWindow::minimumTime()
+{
     int resolution;
     QVector<int> lcm = QVector<int>();
     // Re-calculate minTime
@@ -331,8 +341,8 @@ void UpdateWindow::minimumTime() {
         case 6: resolution = LCM(LCM(LCM(LCM(LCM(lcm[0],lcm[1]), lcm[2]), lcm[3]), lcm[4]), lcm[5]); break;
         default: resolution = -1;
     }
-    setTimeResolution(resolution);
-} // Find the minimum resolution time to display
+    setTimeResolution(resolution); // Possibility that the time resolution is >= 60 so conversions can take place
+}
 
 int UpdateWindow::GCD(int a, int b) {
    int GCD, temp;
@@ -363,5 +373,4 @@ int UpdateWindow::LCM(int a, int b) {
 void UpdateWindow::clear() {
     for(int i = 0; i <= 5; i++)
         resolutions[i] = -1;
-} // Called when remove button is signaled to clear all changes made to the window
-  // Sets all resolutions to -1, indicating there is no min time to be displayed
+}

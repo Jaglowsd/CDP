@@ -4,6 +4,7 @@
 #include "fileselect.h"
 
 #include <QVector>
+#include <QMap>
 #include <QString>
 #include <QObject>
 #include <QStringList>
@@ -23,32 +24,48 @@ class DataHandler : public QObject
     Q_OBJECT
 
 public:
-    DataHandler(QVector<FileSelect*>*, QVector<int>*, QStringList*, int, QString, int, QString); // Constructor
+    DataHandler(QVector<FileSelect*>*, QVector<int>*, int, QString, int, QString); // Constructor
 
-    QVector<QVector<QString>> fileData;
-    QVector<QVector<QString>> fileHeaders;
-    QVector<QDateTime> startTimes;
+    QVector<QVector<QString>> fileData; // Data stored for each file
+    QMap<QString, QVector<QString>> fileDataMap; // Key is the filetype and value is the data
+    QVector<QVector<QString>> fileHeaders; // Headers stored for each file
+    QVector<QDateTime> startTimes; // Earliest date time for each file
+    QList<QString> fileTypes;
 
     QVector<FileSelect*> *fSList;
-    QStringList *fileTypes;
     QVector<int> *resolutions;
     int timeResolution;
-    QString saveDestination;
+    QString saveAfterAverage;
+    QString saveBeforeAverage;
     QString units;
     int timeScale;
 
-    QDateTime startTime;
+    QDateTime startTimeBlock;
     QDateTime endTimeBlock;
 
-    bool readFiles(); // Open files and send instructions for reading file type
-    void recordFileData(QTextStream*, QRegularExpression); // Saves data by header and data
-    bool pullStartTime(QString, int); // Reads first line of data of each data set and finds the earliest time, set as start time
-    bool printHeaders(); // Prints file name and headers of given files
-    int countCommas(QString); // How many commas needed for even spacing for each file
-    bool findStartTime();
-    int scaledByTimeResolution();
+    void reFormatSave(QString); // Modify save file name to differentiate between before/after averaging output
 
-    bool findTimeBlock();
+    bool readFiles(); // Open files and send instructions for reading file type
+    void recordFileData(QTextStream*, QRegularExpression, QString); // Saves data by header and data
+    bool pullStartTime(QString, int); // Stores start time for each file
+
+    bool findStartTime(); // Find the earliest time among all files
+    void addDateApollo(); // Add date header and date data to Apollo files
+
+    bool printHeaders(); // Prints file name and headers of given files
+    int countCommas(QString); // How many commas needed for even spacing in output 
+
+    bool gatherTimeBlockData(); // Determine data that fits into a time block
+    void scaledByTimeResolution(); // Modify time resolution to match user input time scale
+    bool checkRange(QString, QVector<QString>::iterator, int); // Check if current line of data satisfies time block
+
+    void addDataToBlockBefore(QVector<QVector<QString>>*, QFile*, int); // Adds data to time block/prints block to before averaging save file
+
+    void addDataToBlockAfter(QVector<QVector<QString>>*, QFile*); // Averages data in time block/prints to after output file
+    bool edgeCases(QVector<QStringList>*, int, int); // Handles data that does not need to be averaged: sample number, date, and time
+    QString averageData(QVector<QStringList>*, int); // Averages column of data
+
+    void newTimeBlock(); // Establish new time block
 
 };
 

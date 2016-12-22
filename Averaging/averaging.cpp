@@ -23,7 +23,7 @@ Averaging::Averaging(QVBoxLayout *parent) {
                      "\n<li>Select the units the time should be formatted to</li></ul>");
     //note->setStyleSheet("border: 1px solid black");
     note->setFixedWidth(85);
-    QLabel *minLabel = new QLabel(tr("Minimum Time:"));
+    QLabel *minLabel = new QLabel(tr("Min Time(sec):"));
     minLabel->setStyleSheet("color: gray");
     minLabel->setFixedWidth(80);
     QLabel *timeLabel = new QLabel(tr("Time Scale:"));

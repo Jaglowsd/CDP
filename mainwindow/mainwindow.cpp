@@ -20,8 +20,8 @@ MainWindow::MainWindow() {
     fileLabel->setFixedWidth(470);
     QLabel *typeLabel = new QLabel(tr("File Type:"));
     QLabel *timeLabel = new QLabel(tr("Time Res:"));
-    QLabel *saveLabel = new QLabel(tr("<b>Note: </b>Manually inputting a save destination that does not "
-                                      "exist will create a new file with the specified path"));
+    QLabel *saveLabel = new QLabel(tr("<b>Note: </b>Original name, YourFile.csv, indicates after averaging and "
+                                      "modified path, YourFile_before.csv indicates before averaging."));
 
     removeFile = new QPushButton(tr("Remove Last File"), this);
     addFile = new QPushButton(tr("Add Additional File"), this);
@@ -270,12 +270,18 @@ void MainWindow::clearAll() {
     updateWindow->clear();
 } // Set all currently displayed widgets to their respective default state
 
-void MainWindow::createCSV() {
+void MainWindow::createCSV() { // Check that the time scale is at least the minimum!
     // Check everything is filled out properly here
     bool isEmpty = false;
     bool isWorking = false;
     int fSListLength = 0;
     int fileCount = 0;
+    int timeScale;
+
+    if(averaging->getScaledTime() == -1)
+        timeScale = 0;
+    else
+        timeScale = averaging->getScaledTime();
 
     for(QVector<FileSelect*>::iterator itr = fileSelectList.begin(); itr != fileSelectList.end(); itr++)
     {
@@ -309,11 +315,11 @@ void MainWindow::createCSV() {
                QMessageBox::warning(this, tr("Oops"), tr("A save destination must be specified."));
                return;
            }
-           isWorking = updateWindow->createDataHandler(averaging->getScaledTime(), averaging->getUnits());
+           isWorking = updateWindow->createDataHandler(timeScale, averaging->getUnits());
            if(!isWorking)
                QMessageBox::critical(this, tr("ERROR"), tr("Something went wrong when creating your csv file."));
            else
-               QMessageBox::warning(this, tr("Done!"), tr("Your csv file has been successfully created!"));
+               QMessageBox::warning(this, tr("Done!"), tr("Your csv files have been successfully created!"));
            messageBox.close();
        }
        else
@@ -329,11 +335,11 @@ void MainWindow::createCSV() {
             return;
         }
 
-        isWorking = updateWindow->createDataHandler(averaging->getScaledTime(), averaging->getUnits());
+        isWorking = updateWindow->createDataHandler(timeScale, averaging->getUnits());
         if(!isWorking)
             QMessageBox::critical(this, tr("ERROR"), tr("Something went wrong when creating your csv file."));
         else
-            QMessageBox::warning(this, tr("Done!"), tr("Your csv file has been successfully created!"));
+            QMessageBox::warning(this, tr("Done!"), tr("Your csv files have been successfully created!"));
     }
 
     // Display something
